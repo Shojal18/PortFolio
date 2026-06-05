@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shojal Halbe</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:#0a0a0a;color:#f0f0f0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;cursor:none;overflow-x:hidden;}
+
+#cursor{position:fixed;width:8px;height:8px;background:#fff;border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);}
+#cursor-ring{position:fixed;width:36px;height:36px;border:1px solid rgba(255,255,255,.45);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;justify-content:space-between;align-items:center;padding:1.8rem 3rem;transition:transform .5s cubic-bezier(.4,0,.2,1),opacity .5s;}
+nav.hidden{transform:translateY(-100%);opacity:0;}
+.logo{font-size:.85rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#fff;}
+.nav-links{display:flex;gap:2.5rem;list-style:none;}
+.nav-links a{color:#fff;text-decoration:none;font-size:.75rem;letter-spacing:.15em;text-transform:uppercase;opacity:.55;transition:opacity .2s;}
+.nav-links a:hover{opacity:1;}
+
+/* Hero */
+#hero{height:100vh;display:grid;grid-template-columns:1fr 1fr;position:relative;}
+.hero-left{background:#1a6b8a;display:flex;flex-direction:column;justify-content:flex-end;padding:3rem;position:relative;overflow:hidden;}
+.hero-name{font-size:clamp(4rem,9vw,9rem);font-weight:900;line-height:.9;color:#fff;letter-spacing:-.02em;text-transform:uppercase;}
+.hero-tagline{margin-top:2rem;font-size:.9rem;max-width:260px;color:#fff;opacity:.8;line-height:1.7;}
+.hero-meta{display:flex;gap:2.5rem;margin-top:2.5rem;font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:#fff;opacity:.55;}
+.hero-right{background:#0d0d0d;display:flex;align-items:stretch;justify-content:stretch;position:relative;overflow:hidden;}
+.hero-photo{width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0;}
+.status-chip{position:absolute;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;background:#fff;color:#0a0a0a;padding:.3rem .65rem;font-weight:700;border-radius:2px;}
+.chip-tl{top:1.5rem;left:1.5rem;}
+.chip-br{bottom:1.5rem;right:1.5rem;}
+
+/* 3D Canvas */
+#canvas3d{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;opacity:0;transition:opacity 1s;}
+#canvas3d.visible{opacity:1;}
+
+/* Marquee */
+.marquee-wrap{overflow:hidden;border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);padding:.9rem 0;position:relative;z-index:2;background:#0a0a0a;}
+.marquee-track{display:flex;gap:3rem;white-space:nowrap;width:max-content;animation:marquee 22s linear infinite;}
+.marquee-track span{opacity:.3;letter-spacing:.2em;text-transform:uppercase;font-size:.7rem;color:#fff;}
+@keyframes marquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+/* ── Internships ── */
+#work{position:relative;z-index:2;padding:6rem 3rem;overflow:hidden;}
+
+/* ✅ FIX 1: Increased internship video opacity from .18 → .40 */
+.work-video-bg{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;z-index:0;
+  opacity:.40;          /* was .18 — now clearly visible */
+}
+.work-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,0,0,.70) 0%,rgba(5,20,40,.75) 100%);z-index:1;}
+.work-content{position:relative;z-index:2;}
+.section-label{margin-bottom:4rem;opacity:.35;letter-spacing:.22em;text-transform:uppercase;font-size:.7rem;}
+
+.work-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;}
+.work-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:6px;overflow:hidden;position:relative;cursor:none;transition:border-color .3s,background .3s;}
+.work-card:hover{border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.07);}
+.work-card-inner{padding:1.8rem;}
+.work-glow{position:absolute;inset:0;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.07) 0%,transparent 65%);opacity:0;transition:opacity .3s;pointer-events:none;}
+.work-card:hover .work-glow{opacity:1;}
+.work-year{font-size:.7rem;opacity:.4;letter-spacing:.1em;margin-bottom:.5rem;}
+.work-title{font-size:1.25rem;font-weight:600;margin:.3rem 0 .7rem;color:#fff;}
+.work-desc{font-size:.8rem;opacity:.55;line-height:1.7;margin-bottom:1.2rem;}
+.work-tags{display:flex;gap:.5rem;flex-wrap:wrap;}
+.tag{border:1px solid rgba(255,255,255,.15);padding:.25rem .6rem;border-radius:50px;font-size:.65rem;opacity:.7;}
+.work-link{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;opacity:.45;text-decoration:none;color:#fff;margin-top:1rem;transition:opacity .3s;cursor:none;}
+.work-link:hover{opacity:1;}
+.work-link-arrow{transition:transform .3s;}
+.work-card:hover .work-link-arrow{transform:translateX(4px);}
+
+/* ── About ── */
+#about{border-top:1px solid rgba(255,255,255,.07);background:#0a0a0a;position:relative;z-index:2;padding:6rem 3rem;}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:start;}
+.about-big{font-size:clamp(2rem,4vw,3.5rem);font-weight:800;line-height:1.15;margin-bottom:2rem;color:#fff;}
+.about-text{line-height:1.9;opacity:.65;font-size:.92rem;}
+.skills-list{list-style:none;}
+.skills-list li{padding:1.1rem 0;border-bottom:1px solid rgba(255,255,255,.07);font-size:.95rem;color:#fff;display:flex;justify-content:space-between;align-items:center;transition:text-shadow .3s;}
+.skills-list li:hover{text-shadow:0 0 18px rgba(255,255,255,.9),0 0 32px rgba(255,255,255,.5);}
+.skill-dot{width:7px;height:7px;background:#b8922a;border-radius:50%;flex-shrink:0;}
+
+/* ── Projects ── */
+#projects{border-top:1px solid rgba(255,255,255,.07);background:#0a0a0a;position:relative;z-index:2;padding:6rem 3rem;}
+.projects-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;}
+.proj-card{position:relative;border-radius:8px;overflow:hidden;aspect-ratio:4/3;background:#111;border:1px solid rgba(255,255,255,.07);}
+.proj-card-photo{width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0;opacity:.5;}
+.proj-card-photo-placeholder{width:100%;height:100%;position:absolute;inset:0;background:linear-gradient(135deg,#0d1a2a 0%,#0a0a0a 100%);display:flex;align-items:center;justify-content:center;color:#333;font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;}
+.proj-gradient{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.92) 0%,rgba(0,0,0,.4) 50%,rgba(0,0,0,.1) 100%);z-index:1;}
+.proj-info{position:absolute;bottom:0;left:0;right:0;padding:1.5rem;z-index:2;}
+.proj-num{font-size:.65rem;opacity:.35;letter-spacing:.15em;margin-bottom:.4rem;}
+.proj-title{font-size:1.2rem;font-weight:600;color:#fff;margin-bottom:.4rem;}
+.proj-desc{font-size:.78rem;opacity:.5;line-height:1.6;}
+.proj-tags{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem;}
+.proj-tag{border:1px solid rgba(255,255,255,.12);padding:.2rem .55rem;border-radius:50px;font-size:.62rem;opacity:.6;}
+
+/* ── Contact ── */
+#contact{
+  border-top:1px solid rgba(255,255,255,.07);
+  position:relative;
+  z-index:2;
+  padding:6rem 3rem;
+  overflow:hidden;
+  /* ✅ FIX 2: Removed hard-coded background so video shows through */
+}
+
+/* ✅ FIX 2: Contact video — higher opacity, properly layered */
+.contact-video-bg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  z-index:0;
+  opacity:.55;          /* was .20 — now clearly visible */
+  display:block;
+}
+
+/* ✅ FIX 2: Lighter overlay so video isn't killed */
+.contact-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(0,0,0,.60) 0%,rgba(5,15,30,.65) 100%);
+  z-index:1;
+}
+
+.contact-content{position:relative;z-index:2;}
+.contact-big{font-size:clamp(2.5rem,6vw,5rem);font-weight:800;margin-bottom:2.5rem;line-height:1.1;color:#fff;}
+.contact-big span{color:#5bc4f5;}
+.contact-links{display:flex;gap:2rem;flex-wrap:wrap;}
+.contact-links a{color:#fff;text-decoration:none;opacity:.5;font-size:.82rem;letter-spacing:.1em;text-transform:uppercase;border-bottom:1.5px solid rgba(255,255,255,.15);padding-bottom:.2rem;transition:opacity .3s,border-color .3s;}
+.contact-links a:hover{opacity:1;border-color:#fff;}
+
+/* ✅ FIX 2: Right side of contact — video preview box (where the circle was) */
+.contact-inner{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:4rem;
+  align-items:center;
+}
+.contact-video-preview{
+  position:relative;
+  border-radius:12px;
+  overflow:hidden;
+  aspect-ratio:16/9;
+  border:1px solid rgba(255,255,255,.15);
+  box-shadow:0 0 40px rgba(91,196,245,.15);
+}
+.contact-video-preview video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  opacity:1;        /* full opacity inside its own container */
+}
+/* play icon overlay */
+.contact-video-preview::after{
+  content:'▶';
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:2.5rem;
+  color:rgba(255,255,255,.5);
+  pointer-events:none;
+}
+
+footer{padding:1.8rem 3rem;display:flex;justify-content:space-between;border-top:1px solid rgba(255,255,255,.07);background:#0a0a0a;position:relative;z-index:2;}
+footer p{opacity:.25;font-size:.75rem;letter-spacing:.08em;}
+
+/* Internship detail page */
+#intern-page{display:none;position:fixed;inset:0;background:#0a0a0a;z-index:1000;overflow-y:auto;padding:5rem 3rem 3rem;}
+#intern-page.open{display:block;}
+.intern-back{display:inline-flex;align-items:center;gap:.5rem;color:#fff;text-decoration:none;font-size:.75rem;letter-spacing:.15em;text-transform:uppercase;opacity:.5;cursor:none;margin-bottom:3rem;transition:opacity .3s;border:none;background:none;}
+.intern-back:hover{opacity:1;}
+.intern-title{font-size:clamp(2.5rem,6vw,5rem);font-weight:900;text-transform:uppercase;margin-bottom:1rem;line-height:1;}
+.intern-year{font-size:.8rem;opacity:.4;letter-spacing:.15em;margin-bottom:2rem;}
+.intern-body{max-width:680px;line-height:1.9;opacity:.7;font-size:.95rem;}
+.intern-tags-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:2rem;}
+
+.marquee-wrap{overflow:hidden;width:100%;background:#000;padding:15px 0;}
+.marquee-track{display:flex;gap:30px;white-space:nowrap;}
+.marquee-track span{
+  color:#fff;font-size:1.1rem;font-weight:600;
+  text-shadow:0 0 5px rgba(255,255,255,.9),0 0 10px rgba(255,255,255,.8),0 0 20px rgba(255,255,255,.8),0 0 40px rgba(255,255,255,.7),0 0 80px rgba(255,255,255,.6);
+  animation:glow 2s ease-in-out infinite alternate;
+}
+@keyframes glow{
+  from{text-shadow:0 0 5px #fff,0 0 10px #fff,0 0 20px #fff;}
+  to{text-shadow:0 0 10px #fff,0 0 20px #fff,0 0 40px #fff,0 0 80px #fff;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="canvas3d"></canvas>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- Internship detail page -->
+<div id="intern-page">
+  <button class="intern-back" onclick="closeIntern()">← Back</button>
+  <div class="intern-year" id="ip-year"></div>
+  <h1 class="intern-title" id="ip-title"></h1>
+  <div class="intern-tags-row" id="ip-tags"></div>
+  <p class="intern-body" id="ip-body"></p>
+</div>
+
+<nav id="navbar">
+  <div class="logo">Hi, Welcome</div>
+  <ul class="nav-links">
+    <li><a href="#work" data-text="Internships">Internships</a></li>
+    <li><a href="#projects" data-text="Projects">Projects</a></li>
+    <li><a href="#about" data-text="About Me">About Me</a></li>
+    <li><a href="#contact" data-text="Contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-left">
+    <h1 class="hero-name">Shojal<br>Halbe</h1>
+    <p class="hero-tagline">3rd year Computer Science student at Suryodaya College of Engineering</p>
+    <div class="hero-meta">
+      <span>Nagpur, IN</span>
+      <span id="live-date">—</span>
+      <span id="live-time">—</span>
+    </div>
+    <div class="status-chip chip-br">Scroll ↓</div>
+  </div>
+  <div class="hero-right">
+    <img src="img1.jpeg" class="hero-photo" alt="Shojal Halbe">
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span>Frontend Development</span><span>•</span>
+    <span>UI/UX Design</span><span>•</span>
+    <span>IoT Development</span><span>•</span>
+    <span>Creative Coding</span><span>•</span>
+    <span>Web Animation</span><span>•</span>
+    <span>React</span><span>•</span>
+    <span>Node.js</span><span>•</span>
+    <span>Frontend Development</span><span>•</span>
+    <span>UI/UX Design</span><span>•</span>
+    <span>IoT Development</span><span>•</span>
+    <span>Creative Coding</span><span>•</span>
+    <span>Web Animation</span><span>•</span>
+    <span>React</span><span>•</span>
+    <span>Node.js</span><span>•</span>
+  </div>
+</div>
+
+<!-- INTERNSHIPS -->
+<section id="work">
+  <video class="work-video-bg" autoplay muted loop playsinline>
+    <source src="error.mp4" type="video/mp4">
+  </video>
+  <div class="work-overlay"></div>
+  <div class="work-content">
+    <p class="section-label">Internships</p>
+    <div class="work-grid">
+
+      <div class="work-card" data-intern="0">
+        <div class="work-glow"></div>
+        <div class="work-card-inner">
+          <div class="work-year">2025</div>
+          <h2 class="work-title">Full Stack Developer Intern</h2>
+          <p class="work-desc">Project based internship</p>
+          <div class="work-tags">
+            <span class="tag">React</span><span class="tag">Node.js</span><span class="tag">Mern Stack</span>
+          </div>
+          <a class="work-link" onclick="openIntern(0)">View Project <span class="work-link-arrow">→</span></a>
+        </div>
+      </div>
+
+      <div class="work-card" data-intern="1">
+        <div class="work-glow"></div>
+        <div class="work-card-inner">
+          <div class="work-year">2025</div>
+          <h2 class="work-title">IoT Developer Intern</h2>
+          <p class="work-desc">Iot Projects</p>
+          <div class="work-tags">
+            <span class="tag">IoT</span><span class="tag">Database</span><span class="tag">Real-Time</span>
+          </div>
+          <a class="work-link" onclick="openIntern(1)">View Project <span class="work-link-arrow">→</span></a>
+        </div>
+      </div>
+
+      <div class="work-card" data-intern="2">
+        <div class="work-glow"></div>
+        <div class="work-card-inner">
+          <div class="work-year">2025</div>
+          <h2 class="work-title">Web Developer Intern</h2>
+          <p class="work-desc">Build Web Applications</p>
+          <div class="work-tags">
+            <span class="tag">HTML/CSS</span><span class="tag">Design</span><span class="tag">Frontend</span>
+          </div>
+          <a class="work-link" onclick="openIntern(2)">View Project <span class="work-link-arrow">→</span></a>
+        </div>
+      </div>
+
+      <div class="work-card" data-intern="3">
+        <div class="work-glow"></div>
+        <div class="work-card-inner">
+          <div class="work-year">2024</div>
+          <h2 class="work-title">IoT Developer Intern</h2>
+          <p class="work-desc">Virtual Internship</p>
+          <div class="work-tags">
+            <span class="tag">ThinkBox</span><span class="tag">Devices</span><span class="tag">Data</span>
+          </div>
+          <a class="work-link" onclick="openIntern(3)">View Project <span class="work-link-arrow">→</span></a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <p class="section-label">Projects</p>
+  <div class="projects-grid">
+
+    <div class="proj-card">
+      <div class="proj-card-photo-placeholder">Add photo</div>
+      <img src="img2.jpg" class="proj-card-photo" alt="Project 1">
+      <div class="proj-gradient"></div>
+      <div class="proj-info">
+        <div class="proj-num">Hackton</div>
+        <div class="proj-title">Solo Travel</div>
+        <div class="proj-tags"><span class="proj-tag">HTML/CSS</span><span class="proj-tag">JavaScript</span></div>
+      </div>
+    </div>
+
+    <div class="proj-card">
+      <div class="proj-card-photo-placeholder">Add photo</div>
+      <img src="img3.jpg" class="proj-card-photo" alt="Project 2">
+      <div class="proj-gradient"></div>
+      <div class="proj-info">
+        <div class="proj-num">Hackton</div>
+        <div class="proj-title">Campus Cure</div>
+        <div class="proj-tags"><span class="proj-tag">Frontend</span><span class="proj-tag">Web Development</span></div>
+      </div>
+    </div>
+
+    <div class="proj-card">
+      <div class="proj-card-photo-placeholder">Add photo</div>
+      <img src="img4.jpg" class="proj-card-photo" alt="Project 3">
+      <div class="proj-gradient"></div>
+      <div class="proj-info">
+        <div class="proj-num">SIH</div>
+        <div class="proj-title">DropOut Prediction</div>
+        <div class="proj-tags"><span class="proj-tag">Dyanmic Web App</span><span class="proj-tag">AI Bot</span></div>
+      </div>
+    </div>
+
+    <div class="proj-card">
+      <div class="proj-card-photo-placeholder">Add photo</div>
+      <img src="img5.jpg" class="proj-card-photo" alt="Project 4">
+      <div class="proj-gradient"></div>
+      <div class="proj-info">
+        <div class="proj-num">CEP</div>
+        <div class="proj-title">Community Engagement Platform</div>
+        <div class="proj-tags"><span class="proj-tag">SDG</span><span class="proj-tag">Community Development</span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <p class="section-label">About</p>
+  <div class="about-grid">
+    <div>
+      <h2 class="about-big">Think.<br>Build.<br>Evolve.</h2>
+      <p class="about-text">I'm Shojal, a web developer passionate about building immersive digital experiences and creative interfaces. I work at the intersection of design and technology, creating things that feel alive.</p>
+      <p class="about-text" style="margin-top:1.2rem;">Currently studying and interning, always building something new.</p>
+    </div>
+    <ul class="skills-list">
+      <li>HTML / CSS / JavaScript <span class="skill-dot"></span></li>
+      <li>React <span class="skill-dot"></span></li>
+      <li>Node.js <span class="skill-dot"></span></li>
+      <li>IoT Development <span class="skill-dot"></span></li>
+      <li>UI/UX Design <span class="skill-dot"></span></li>
+      <li>Creative Coding <span class="skill-dot"></span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- CONTACT — video background + video preview panel on the right -->
+<section id="contact">
+
+  <!-- ✅ Background video for the whole section -->
+  <video class="contact-video-bg" autoplay muted loop playsinline>
+    <source src="support.mp4" type="video/mp4">
+  </video>
+  <div class="contact-overlay"></div>
+
+  <div class="contact-content">
+    <p class="section-label">Get In Touch</p>
+
+    <!-- ✅ Two-column layout: text left, video right (where the circle was) -->
+    <div class="contact-inner">
+
+      <div>
+        <h2 class="contact-big">Let's build<br><span>something</span><br>together.</h2>
+        <div class="contact-links">
+          <a href="https://github.com/YOUR_USERNAME" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="https://linkedin.com/in/YOUR_USERNAME" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+          <a href="mailto:YOUR_EMAIL@gmail.com">Email</a>
+        </div>
+      </div>
+
+     
+
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>Shojal Halbe — Portfolio</p>
+  <p>Nagpur, India</p>
+</footer>
+
+<script>
+/* ── Internship data ── */
+const internships=[
+  {year:'2025',title:'Full Stack Developer Intern',body:'Full Stack Developer Intern Codec Technologies India-Nagpur, Maharashtra Internship May 2025 to August 2025 As a Full Stack Developer Intern at Codec Technologies, I’m contributing to the development and enhancement of web applications by working across both frontend and backend technologies. My responsibilities include writing clean, scalable code, participating in code reviews, and collaborating with cross-functional teams on project requirements and deliverables. This internship is enhancing my skills in modern web development frameworks, version control, and agile methodologies, while also giving me exposure to real-world problem-solving and professional best practices.',tags:['React','Node.js','UI/UX']},
+  {year:'2025',title:'Web Developer Intern',body:'Web Developer Intern Codec Technologies India-Nagpur, Maharashtra Internship May 2025 to July 2025 I have completed a 1-month internship in Internet of Things (IoT) with a focus on cloud integration, gaining hands-on experience in connecting devices to cloud platforms, managing real-time data, and building scalable IoT solutions..',tags:['IoT','JavaScript','Hardware']},
+  {year:'2025',title:'Web Developer Intern',body:'Web Developer Intern Credora-Nagpur, Maharashtra Internship March 2025 to April 2025 Join the team at Credora! for the role of Web Development and Designing. The internship will run from 31 March 2025 to 30 April 2025 and is designed to help , learn and develop new skills while gaining hands-on experience.',tags:['HTML/CSS','Design','Frontend']},
+  {year:'2024',title:'IoT Solutions Intern',body:'IoT Intern Suryodaya College of Engineering & Technology-Nagpur, Maharashtra Internship November 2024 to December 2024 Virtual Internship Program On Internet of Things for Smart Agriculture organized by Suryodaya Technology Business Incubator Foundation During this program, the participant gained hands-on experience in: Arduino Programming. Sensor Interfacing, Real-Time Data Visualization on Dashboard',tags:['Python','ML','Data']}
+];
+
+function openIntern(i){
+  const d=internships[i];
+  document.getElementById('ip-year').textContent=d.year;
+  document.getElementById('ip-title').textContent=d.title;
+  document.getElementById('ip-body').textContent=d.body;
+  const tr=document.getElementById('ip-tags');
+  tr.innerHTML=d.tags.map(t=>`<span class="tag">${t}</span>`).join('');
+  document.getElementById('intern-page').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeIntern(){
+  document.getElementById('intern-page').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+/* ── Cursor ── */
+const cur=document.getElementById('cursor');
+const ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
+(function animRing(){rx+=(mx-rx)*.11;ry+=(my-ry)*.11;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);})();
+
+/* ── Work card glow ── */
+document.querySelectorAll('.work-card').forEach(card=>{
+  card.addEventListener('mousemove',e=>{
+    const r=card.getBoundingClientRect();
+    card.style.setProperty('--mx',((e.clientX-r.left)/r.width*100).toFixed(1)+'%');
+    card.style.setProperty('--my',((e.clientY-r.top)/r.height*100).toFixed(1)+'%');
+  });
+});
+
+/* ── Nav scramble ── */
+const CHARS='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&';
+function scramble(el){
+  const orig=el.dataset.text||el.textContent;
+  let iter=0;
+  const iv=setInterval(()=>{
+    el.textContent=orig.split('').map((c,i)=>{
+      if(c===' ')return ' ';
+      if(i<iter)return orig[i];
+      return CHARS[Math.floor(Math.random()*CHARS.length)];
+    }).join('');
+    iter+=.9;
+    if(iter>=orig.length){el.textContent=orig;clearInterval(iv);}
+  },40);
+}
+document.querySelectorAll('.nav-links a').forEach(a=>a.addEventListener('mouseenter',()=>scramble(a)));
+
+/* ── Nav hide on scroll ── */
+const navbar=document.getElementById('navbar');
+let lastY=0,ticking=false;
+window.addEventListener('scroll',()=>{
+  if(!ticking){requestAnimationFrame(()=>{const y=window.scrollY;if(y>lastY&&y>120)navbar.classList.add('hidden');else navbar.classList.remove('hidden');lastY=y;ticking=false;});ticking=true;}
+});
+
+/* ── Live date/time ── */
+function pad(n){return String(n).padStart(2,'0');}
+function tick(){
+  const d=new Date();
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('live-date').textContent=months[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear();
+  let h=d.getHours(),ampm=h>=12?'PM':'AM';h=h%12||12;
+  document.getElementById('live-time').textContent=h+':'+pad(d.getMinutes())+' '+ampm;
+}
+tick();setInterval(tick,1000);
+
+/* ── 3D Wireframe ── */
+const canvas=document.getElementById('canvas3d');
+const ctx=canvas.getContext('2d');
+function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resize();window.addEventListener('resize',resize);
+const PHI=(1+Math.sqrt(5))/2;
+const ico=[[-1,PHI,0],[1,PHI,0],[-1,-PHI,0],[1,-PHI,0],[0,-1,PHI],[0,1,PHI],[0,-1,-PHI],[0,1,-PHI],[PHI,0,-1],[PHI,0,1],[-PHI,0,-1],[-PHI,0,1]];
+let pts=ico.map(v=>{const l=Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);return[v[0]/l,v[1]/l,v[2]/l];});
+let faces=[[0,11,5],[0,5,1],[0,1,7],[0,7,10],[0,10,11],[1,5,9],[5,11,4],[11,10,2],[10,7,6],[7,1,8],[3,9,4],[3,4,2],[3,2,6],[3,6,8],[3,8,9],[4,9,5],[2,4,11],[6,2,10],[8,6,7],[9,8,1]];
+function mid(a,b){const m=[(a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2];const l=Math.sqrt(m[0]*m[0]+m[1]*m[1]+m[2]*m[2]);return[m[0]/l,m[1]/l,m[2]/l];}
+const nf=[];const mm={};
+function gm(i,j){const k=Math.min(i,j)+'_'+Math.max(i,j);if(!mm[k]){mm[k]=pts.length;pts.push(mid(pts[i],pts[j]));}return mm[k];}
+for(const[a,b,c]of faces){const ab=gm(a,b),bc=gm(b,c),ca=gm(c,a);nf.push([a,ab,ca],[b,bc,ab],[c,ca,bc],[ab,bc,ca]);}
+faces=nf;
+let angle=0,miX=0,miY=0;
+document.addEventListener('mousemove',e=>{miX=(e.clientX/window.innerWidth-.5)*.4;miY=(e.clientY/window.innerHeight-.5)*.4;});
+function rX(v,a){return[v[0],v[1]*Math.cos(a)-v[2]*Math.sin(a),v[1]*Math.sin(a)+v[2]*Math.cos(a)];}
+function rY(v,a){return[v[0]*Math.cos(a)+v[2]*Math.sin(a),v[1],-v[0]*Math.sin(a)+v[2]*Math.cos(a)];}
+const R=Math.min(window.innerWidth,window.innerHeight)*.28;
+function drawModel(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const cx=canvas.width/2,cy=canvas.height/2;
+  const proj=pts.map(v=>{let p=rY(v,angle+miX);p=rX(p,miY);const z=p[2]+2.5;const s=2.5/z;return{x:cx+p[0]*R*s,y:cy-p[1]*R*s,z:p[2],depth:z};});
+  const sorted=[...faces].sort((a,b)=>{const da=(proj[a[0]].depth+proj[a[1]].depth+proj[a[2]].depth)/3;const db=(proj[b[0]].depth+proj[b[1]].depth+proj[b[2]].depth)/3;return da-db;});
+  const es=new Set();
+  for(const[a,b,c]of sorted){[[a,b],[b,c],[c,a]].forEach(([i,j])=>{const k=Math.min(i,j)+'_'+Math.max(i,j);if(es.has(k))return;es.add(k);const pa=proj[i],pb=proj[j];const norm=(((pa.depth+pb.depth)/2)-1.8)/1.5;const alpha=Math.max(0,Math.min(1,.1+(1-norm*.6)*.5));ctx.beginPath();ctx.moveTo(pa.x,pa.y);ctx.lineTo(pb.x,pb.y);ctx.strokeStyle=`rgba(255,255,255,${alpha})`;ctx.lineWidth=.6;ctx.stroke();});}
+  pts.forEach((_,i)=>{const p=proj[i];const b=Math.max(0,p.z*.3+.1);if(b>.05){ctx.beginPath();ctx.arc(p.x,p.y,1.2,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${b})`;ctx.fill();}});
+  angle+=.003;requestAnimationFrame(drawModel);
+}
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(!e.isIntersecting)canvas.classList.add('visible');else canvas.classList.remove('visible');});},{threshold:.5});
+obs.observe(document.getElementById('hero'));
+drawModel();
+</script>
+</body>
+</html>
